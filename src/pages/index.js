@@ -1,0 +1,11 @@
+export { default as Login } from './Login';
+export { default as Register } from './Register';
+export { default as Dashboard } from './Dashboard';
+export { default as Products } from './Products';
+export { default as Suppliers } from './Suppliers';
+export { default as Users } from './Users';
+export { default as Roles } from './Roles';
+export { default as Permissions } from './Permissions';
+export { default as Pos } from './Pos';
+export { default as Settings } from './Settings';
+export { default as Unauthorized } from './Unauthorized';
