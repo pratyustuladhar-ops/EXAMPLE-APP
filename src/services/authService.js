@@ -1,4 +1,4 @@
-import { mockUsers } from './mockData';
+import { mockUsers, getUsers, saveUsers } from './mockData';
 
 const AUTH_STORAGE_KEY = 'pos-user';
 
@@ -11,7 +11,8 @@ export const getStoredUser = () => {
 
 export const loginUser = (email, password) => {
   const normalizedEmail = email.trim().toLowerCase();
-  const matchingUser = mockUsers.find((user) => user.email === normalizedEmail);
+  const users = getUsers();
+  const matchingUser = users.find((user) => user.email === normalizedEmail);
 
   if (!matchingUser) {
     return { success: false, message: 'No matching mock account found.' };
@@ -33,6 +34,15 @@ export const registerUser = (formData) => {
     email: formData.email.trim().toLowerCase(),
     role: 'cashier',
   };
+
+  // persist new user to the mock users list and to current session
+  try {
+    const users = getUsers();
+    const next = [...users, user];
+    saveUsers(next);
+  } catch (e) {
+    // ignore
+  }
 
   localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
   return { success: true, user };

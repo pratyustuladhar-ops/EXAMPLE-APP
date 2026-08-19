@@ -11,11 +11,56 @@ export const mockSuppliers = [
   { id: 3, name: 'Urban Equip Co.', contact: 'Jason', phone: '+1 555 0177', category: 'Equipment' },
 ];
 
-export const mockUsers = [
+const INITIAL_USERS = [
   { id: 1, name: 'Admin User', email: 'admin@pos.com', role: 'admin' },
   { id: 2, name: 'Supplier Lead', email: 'supplier@pos.com', role: 'supplier' },
   { id: 3, name: 'Cashier Sam', email: 'cashier@pos.com', role: 'cashier' },
 ];
+
+const USERS_STORAGE_KEY = 'mock-users';
+
+export const mockUsers = INITIAL_USERS;
+
+export const getUsers = () => {
+  if (typeof window === 'undefined') return [...INITIAL_USERS];
+
+  try {
+    const stored = localStorage.getItem(USERS_STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch (e) {
+    // ignore and fall back to initial
+  }
+
+  return [...INITIAL_USERS];
+};
+
+export const saveUsers = (users) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+};
+
+export const updateUserRole = (userId, newRole) => {
+  const users = getUsers();
+  const idx = users.findIndex((u) => u.id === userId);
+  if (idx === -1) return null;
+
+  users[idx] = { ...users[idx], role: newRole };
+  saveUsers(users);
+
+  try {
+    const storedCurrent = localStorage.getItem('pos-user');
+    if (storedCurrent) {
+      const cur = JSON.parse(storedCurrent);
+      if (cur.id === userId) {
+        localStorage.setItem('pos-user', JSON.stringify({ ...cur, role: newRole }));
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  return users[idx];
+};
 
 export const mockRoles = [
   { name: 'Admin', level: 'Full access', summary: 'Manage inventory, roles, permissions and settings.' },

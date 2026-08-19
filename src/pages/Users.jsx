@@ -1,9 +1,32 @@
-import { Card, Table } from '../components';
+import { useEffect, useState } from 'react';
+import { Card, Table, RoleBadge } from '../components';
 import MainLayout from '../layouts/MainLayout';
-import { mockUsers } from '../services/mockData';
-import { RoleBadge } from '../components';
+import { getUsers, updateUserRole, mockRoles } from '../services/mockData';
+import { useAuth } from '../context/AuthContext';
+
+const RolesSelect = ({ value, onChange }) => (
+  <select value={value} onChange={(e) => onChange(e.target.value)} className="rounded border px-2 py-1 text-sm">
+    {mockRoles.map((r) => (
+      <option key={r.name} value={r.name.toLowerCase()}>{r.name}</option>
+    ))}
+  </select>
+);
 
 const Users = () => {
+  const [users, setUsers] = useState([]);
+  const { user: current } = useAuth();
+
+  useEffect(() => {
+    setUsers(getUsers());
+  }, []);
+
+  const handleRoleChange = (uId, newRole) => {
+    const updated = updateUserRole(uId, newRole);
+    if (updated) {
+      setUsers((prev) => prev.map((p) => (p.id === uId ? updated : p)));
+    }
+  };
+
   return (
     <MainLayout>
       <div className="space-y-6">
@@ -14,8 +37,16 @@ const Users = () => {
 
         <Card title="Team members" className="border border-slate-200 bg-white shadow-sm">
           <Table
-            headers={['Name', 'Email', 'Role']}
-            rows={mockUsers.map((user) => [user.name, user.email, <RoleBadge key={user.id} role={user.role} />])}
+            headers={["Name", "Email", "Role"]}
+            rows={users.map((u) => [
+              u.name,
+              u.email,
+              current?.role === 'admin' ? (
+                <RolesSelect key={u.id} value={u.role} onChange={(val) => handleRoleChange(u.id, val)} />
+              ) : (
+                <RoleBadge key={u.id} role={u.role} />
+              ),
+            ])}
             emptyMessage="No users available."
           />
         </Card>
